@@ -1,8 +1,7 @@
 {
-  "name": "@pinosandro-lp/react-plugin-system",
+  "name": "@pinosandro/react-plugin-system",
   "description": "A lightweight and flexible plugin system for React applications",
   "version": "0.1.0",
-  "private": true,
   "author": "Alessandro Lo Presti",
   "license": "MIT",
   "type": "module",
