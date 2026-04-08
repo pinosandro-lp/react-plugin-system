@@ -5,6 +5,10 @@
   "author": "Alessandro Lo Presti",
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pinosandro-lp/react-plugin-system.git"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.js",
