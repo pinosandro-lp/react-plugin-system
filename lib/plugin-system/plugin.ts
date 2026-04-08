@@ -48,7 +48,7 @@ export class Plugin<Id extends PluginApiStoreKey, Deps extends PluginDeps> {
     return Object.entries(this.#dependencies).reduce((acc, [alias, depId]) => {
       const depPlugin = pm.plugins.find(p => p.id === depId);
 
-      // impossible case if PluginManager is working properly
+      // this case should never be possible, in case of missing dependencies the PluginManager should throw an error during registration
       if (!depPlugin) {
         throw new Error(`Missing dependency: ${depId} for plugin ${this.id}.`);
       }
