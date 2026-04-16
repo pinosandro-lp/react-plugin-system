@@ -12,7 +12,7 @@ import type { LoadablePlugins } from './types';
 export function createPluginApp(params: {
   plugins: LoadablePlugins;
   App: React.FC;
-}): React.FC<React.PropsWithChildren> {
+}): React.FC {
   const { plugins, App } = params;
 
   const pluginManager = PluginManager.getInstance();
