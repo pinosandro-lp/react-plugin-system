@@ -32,14 +32,14 @@ export class PluginManager {
       throw new Error(`Plugin ${plugin.id} is already registered.`);
 
     const missingDependencies = plugin.dependencies?.filter(
-      d => !this.pluginMap.has(d)
+      d => !this.pluginMap.has(d),
     );
 
     if (missingDependencies?.length)
       throw new Error(
         `Plugin ${
           plugin.id
-        } has missing dependencies: ${missingDependencies.join(', ')}.`
+        } has missing dependencies: ${missingDependencies.join(', ')}.`,
       );
 
     this.pluginMap.set(plugin.id, plugin);
@@ -55,6 +55,16 @@ export class PluginManager {
   /** Get all registered plugins. */
   get plugins(): Plugin<PluginApiStoreKey, PluginDeps>[] {
     return [...this.pluginMap.values()];
+  }
+
+  /** Get a plugin by its unique identifier.
+   * @param id - The unique identifier of the plugin.
+   * @returns The plugin with the specified ID, or undefined if not found.
+   */
+  getById<Id extends PluginApiStoreKey>(
+    id: Id,
+  ): Plugin<Id, PluginDeps> | undefined {
+    return this.pluginMap.get(id) as Plugin<Id, PluginDeps> | undefined;
   }
 
   /** Clear all registered plugins (for testing purposes). */
