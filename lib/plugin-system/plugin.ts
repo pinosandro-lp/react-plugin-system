@@ -38,7 +38,7 @@ export class Plugin<Id extends PluginApiStoreKey, Deps extends PluginDeps> {
   /** Check if the plugin is registered in the PluginManager. */
   private isRegistered(): boolean {
     const pm = PluginManager.getInstance();
-    return !!pm.plugins.find(p => p.id === this.id);
+    return !!pm.getById(this.id);
   }
 
   /** Resolves the dependencies of the plugin by retrieving their API clients from the PluginManager. */
@@ -46,7 +46,7 @@ export class Plugin<Id extends PluginApiStoreKey, Deps extends PluginDeps> {
     const pm = PluginManager.getInstance();
 
     return Object.entries(this.#dependencies).reduce((acc, [alias, depId]) => {
-      const depPlugin = pm.plugins.find(p => p.id === depId);
+      const depPlugin = pm.getById(depId);
 
       // this case should never be possible, in case of missing dependencies the PluginManager should throw an error during registration
       if (!depPlugin) {

@@ -39,7 +39,7 @@ describe('PluginManager class', () => {
 
     expect(() => {
       pluginManager.load([testPlugin, testPlugin]);
-    }).toThrowError(`Plugin ${TEST_PLUGIN_ID} is already registered.`);
+    }).toThrow(`Plugin ${TEST_PLUGIN_ID} is already registered.`);
   });
 
   it('should throw an error when registering a plugin with missing dependencies', () => {
@@ -47,8 +47,8 @@ describe('PluginManager class', () => {
 
     expect(() => {
       pluginManager.load([dependencyTestPlugin]);
-    }).toThrowError(
-      `Plugin ${DEPENDENCY_TEST_PLUGIN_ID} has missing dependencies: ${TEST_PLUGIN_ID}.`
+    }).toThrow(
+      `Plugin ${DEPENDENCY_TEST_PLUGIN_ID} has missing dependencies: ${TEST_PLUGIN_ID}.`,
     );
   });
 
@@ -57,8 +57,8 @@ describe('PluginManager class', () => {
 
     expect(() => {
       pluginManager.load([dependencyTestPlugin, testPlugin]);
-    }).toThrowError(
-      `Plugin ${DEPENDENCY_TEST_PLUGIN_ID} has missing dependencies: ${TEST_PLUGIN_ID}.`
+    }).toThrow(
+      `Plugin ${DEPENDENCY_TEST_PLUGIN_ID} has missing dependencies: ${TEST_PLUGIN_ID}.`,
     );
   });
 
@@ -79,6 +79,28 @@ describe('PluginManager class', () => {
     const plugins = pluginManager.plugins;
 
     expect(plugins).toHaveLength(0);
+  });
+
+  it('should return a plugin by its ID', () => {
+    const pluginManager = PluginManager.getInstance();
+
+    pluginManager.load([testPlugin, dependencyTestPlugin]);
+
+    const plugin = pluginManager.getById(TEST_PLUGIN_ID);
+
+    expect(plugin).toBe(testPlugin);
+  });
+
+  it('should return undefined if a plugin with the specified ID is not found', () => {
+    const pluginManager = PluginManager.getInstance();
+
+    pluginManager.load([testPlugin, dependencyTestPlugin]);
+
+    const plugin = pluginManager.getById(
+      'non-existent-plugin' as typeof TEST_PLUGIN_ID,
+    );
+
+    expect(plugin).toBeUndefined();
   });
 
   it('should clear all registered plugins', () => {

@@ -1,9 +1,4 @@
-import type {
-  Plugin,
-  PluginApiStore,
-  PluginApiStoreKey,
-  PluginDeps,
-} from '../plugin-system';
+import type { PluginApiStore, PluginApiStoreKey } from '../plugin-system';
 import { usePluginManager } from './usePluginManager';
 
 /** Hook to access a plugin's API client by its ID.
@@ -12,13 +7,11 @@ import { usePluginManager } from './usePluginManager';
  * @throws Will throw an error if the plugin is not registered.
  */
 export function usePluginApi<ID extends PluginApiStoreKey>(
-  pluginId: ID
+  pluginId: ID,
 ): PluginApiStore[ID] {
   const pluginManager = usePluginManager();
 
-  const plugin = pluginManager.plugins.find(
-    (p: Plugin<PluginApiStoreKey, PluginDeps>) => p.id === pluginId
-  );
+  const plugin = pluginManager.getById(pluginId);
 
   if (!plugin) throw new Error(`Plugin ${pluginId} is not registered.`);
 

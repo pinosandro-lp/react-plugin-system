@@ -48,8 +48,6 @@ describe('Plugin class', () => {
   it('should throw an error when accessing the API of an unregistered plugin', () => {
     const fn = (): NotRegistredPluginApi => notRegistredPlugin.api;
 
-    expect(fn).toThrowError(
-      `Plugin ${NOT_REGISTRED_PLUGIN_ID} is not registered.`
-    );
+    expect(fn).toThrow(`Plugin ${NOT_REGISTRED_PLUGIN_ID} is not registered.`);
   });
 });
