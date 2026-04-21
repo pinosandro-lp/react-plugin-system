@@ -17,22 +17,26 @@ export class Plugin<Id extends PluginApiStoreKey, Deps extends PluginDeps> {
   #dependencies: Deps;
   #createApiClient: (deps: PluginDepsMap<Deps>) => PluginApiStore[Id];
   #apiClient: Readonly<PluginApiStore[Id]> | null = null;
+  #provider?: React.FC<React.PropsWithChildren>;
 
   /**
    * @param params - The parameters for the plugin.
    * @param params.id - The unique identifier for the plugin.
    * @param params.dependencies - An optional object mapping dependency names to their plugin IDs.
    * @param params.createApiClient - A function that creates the API client for the plugin using its dependencies.
+   * @param params.provider - An optional React provider component for the plugin.
    */
   constructor(params: {
     id: Id;
     dependencies?: Deps;
     createApiClient: (deps: PluginDepsMap<Deps>) => PluginApiStore[Id];
+    provider?: React.FC<React.PropsWithChildren>;
   }) {
-    const { id, dependencies = {} as Deps, createApiClient } = params;
+    const { id, dependencies = {} as Deps, createApiClient, provider } = params;
     this.#id = id;
     this.#dependencies = dependencies;
     this.#createApiClient = createApiClient;
+    this.#provider = provider;
   }
 
   /** Check if the plugin is registered in the PluginManager. */
@@ -82,5 +86,10 @@ export class Plugin<Id extends PluginApiStoreKey, Deps extends PluginDeps> {
     }
 
     return this.#apiClient;
+  }
+
+  /** The React provider of the plugin, if provided. */
+  get provider(): React.FC<React.PropsWithChildren> | undefined {
+    return this.#provider;
   }
 }

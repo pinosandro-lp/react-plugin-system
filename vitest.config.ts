@@ -6,7 +6,7 @@ export default defineConfig({
     coverage: {
       reporter: ['text', 'html'],
       include: ['lib/**/*.ts', 'lib/**/*.tsx'],
-      exclude: ['**/index.ts', '**/utils/tests.ts'],
+      exclude: ['**/index.ts', '**/utils/tests.tsx'],
     },
     environment: 'jsdom',
     setupFiles: './setupTest.ts',

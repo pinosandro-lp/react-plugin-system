@@ -1,3 +1,4 @@
+import React from 'react';
 import { Plugin } from '../plugin-system';
 
 export interface TestPluginApi {
@@ -12,15 +13,19 @@ export interface NotRegistredPluginApi {
   baz(): string;
 }
 
+export interface WithProviderPluginApi {}
+
 export const TEST_PLUGIN_ID = 'test.plugin';
 export const DEPENDENCY_TEST_PLUGIN_ID = 'dependency_test.plugin';
 export const NOT_REGISTRED_PLUGIN_ID = 'not_registred.plugin';
+export const WITH_PROVIDER_PLUGIN_ID = 'with_provider.plugin';
 
 declare module '../plugin-system' {
   interface PluginApiStore {
     [TEST_PLUGIN_ID]: TestPluginApi;
     [DEPENDENCY_TEST_PLUGIN_ID]: DependencyTestPluginApi;
     [NOT_REGISTRED_PLUGIN_ID]: NotRegistredPluginApi;
+    [WITH_PROVIDER_PLUGIN_ID]: WithProviderPluginApi;
   }
 }
 
@@ -52,5 +57,19 @@ export const notRegistredPlugin = new Plugin({
     return {
       baz: () => 'baz',
     };
+  },
+});
+
+export const withProviderPlugin = new Plugin({
+  id: WITH_PROVIDER_PLUGIN_ID,
+  createApiClient(): WithProviderPluginApi {
+    return {};
+  },
+  provider: ({ children }): React.JSX.Element => {
+    return (
+      <div data-testid="provider" className="with-provider">
+        {children}
+      </div>
+    );
   },
 });
