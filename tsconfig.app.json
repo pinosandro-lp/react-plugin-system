@@ -28,5 +28,11 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "exclude": ["**/_tests", "**/*.test.ts", "**/*.spec.ts", "**/utils/tests.ts"]
+  "exclude": [
+    "**/_tests",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/utils/tests.ts",
+    "**/examples"
+  ]
 }

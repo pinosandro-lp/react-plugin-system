@@ -59,7 +59,7 @@ const PluginApp = createPluginApp({
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <PluginApp />
-  </StrictMode>
+  </StrictMode>,
 );
 ```
 
@@ -123,8 +123,27 @@ const PluginApp = createPluginApp({
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <PluginApp />
-  </StrictMode>
+  </StrictMode>,
 );
+```
+
+### Plugin Provider
+
+It is possible to add a React context through the `provider` property. This extends, simplifies, and speeds up the integration of plugins that require context. The `provider` automatically wraps the application when the plugin is registered in the app.
+
+If multiple plugins define a provider, each provider will wrap the previous one, following the order in which the plugins are registered.
+
+```js
+import { Plugin } from '@pinosandro/react-plugin-system';
+import { createApiClient } from './plugin.client';
+
+export const FEEDBACK_PLUGIN_ID = 'pinosandro-feedback';
+
+export const feedbackPlugin = new Plugin({
+  id: FEEDBACK_PLUGIN_ID,
+  createApiClient,
+  provider: FeedbackProvider,
+});
 ```
 
 ### Types
