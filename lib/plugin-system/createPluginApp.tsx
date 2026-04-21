@@ -1,9 +1,10 @@
 import { PluginProvider } from '../components';
+import { composeProviders, extractPluginProviders } from '../utils';
 import { PluginManager } from './pluginManager';
 import type { LoadablePlugins } from './types';
 
 /**
- * Decorates the main application component with the plugins system.,
+ * Decorates the main application component with the plugins system.
  * @param params - The parameters for creating the plugin app.
  * @param params.plugins - An array of plugins to be loaded into the application.
  * @param params.App - The main application component.
@@ -19,10 +20,14 @@ export function createPluginApp(params: {
 
   pluginManager.load(plugins);
 
+  const CombinedContexts = composeProviders(extractPluginProviders(plugins));
+
   return function PluginApp() {
     return (
       <PluginProvider pluginManager={pluginManager}>
-        <App />
+        <CombinedContexts>
+          <App />
+        </CombinedContexts>
       </PluginProvider>
     );
   };

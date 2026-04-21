@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { createPluginApp } from '../createPluginApp';
 import { PluginManager } from '../pluginManager';
-import { testPlugin } from '../../utils/tests';
+import { testPlugin, withProviderPlugin } from '../../utils/tests';
 
 describe('createPluginApp', () => {
   afterEach(() => {
@@ -40,5 +40,43 @@ describe('createPluginApp', () => {
     const pluginManager = PluginManager.getInstance();
 
     expect(pluginManager.plugins).toContain(testPlugin);
+  });
+
+  it('should handle empty plugins array', () => {
+    const PluginApp = createPluginApp({
+      plugins: [],
+      App: () => <div>Plugin App</div>,
+    });
+
+    render(<PluginApp />);
+
+    const app = screen.getByText(/plugin app/i);
+
+    expect(app).toBeInTheDocument();
+  });
+
+  it('should handle invalid plugins', () => {
+    expect(() => {
+      createPluginApp({
+        // @ts-expect-error Invalid plugin type
+        plugins: [null],
+        App: () => <div>Plugin App</div>,
+      });
+    }).toThrow();
+  });
+
+  it('should add providers to the app', () => {
+    const PluginApp = createPluginApp({
+      plugins: [withProviderPlugin],
+      App: () => <div>Plugin App</div>,
+    });
+
+    render(<PluginApp />);
+
+    const provider = screen.getByTestId('provider');
+    const app = screen.getByText(/plugin app/i);
+
+    expect(provider).toBeInTheDocument();
+    expect(app).toBeInTheDocument();
   });
 });

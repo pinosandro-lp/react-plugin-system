@@ -8,6 +8,7 @@ import {
   type NotRegistredPluginApi,
   TEST_PLUGIN_ID,
   testPlugin,
+  withProviderPlugin,
 } from '../../utils/tests';
 
 describe('Plugin class', () => {
@@ -49,5 +50,13 @@ describe('Plugin class', () => {
     const fn = (): NotRegistredPluginApi => notRegistredPlugin.api;
 
     expect(fn).toThrow(`Plugin ${NOT_REGISTRED_PLUGIN_ID} is not registered.`);
+  });
+
+  it('should provider be undefined if not provided', () => {
+    expect(testPlugin.provider).toBeUndefined();
+  });
+
+  it('should return the provided provider', () => {
+    expect(withProviderPlugin.provider).toBeDefined();
   });
 });
