@@ -233,9 +233,11 @@ export const depsExamplePlugin = new Plugin({
 
 ### End Notes
 
-The plugin API client is **fully customizable** to fit your specific needs. It can include not only utility functions but also, for example, **React components** that can be accessed via `usePluginApi`.
+The plugin API client is **fully customizable** to fit your specific needs. It can include not only utility functions but also, for example, **React components and hooks** that can be accessed via `usePluginApi`.
 
-However, this approach is usually only necessary for **special cases**. In most scenarios, it’s sufficient to define plugin-related components within the plugin’s folder structure.
+However, exposing React components or hooks through the API is generally **discouraged**, except for **special cases**. The plugin API is primarily intended to expose **functionality and services**, while components and hooks are better kept as part of the plugin's UI and can be exported directly from the plugin when they need to be consumed by the application.
+
+This avoids unnecessary coupling and indirection while keeping the plugin API focused on its actual capabilities.
 
 ## License
 
