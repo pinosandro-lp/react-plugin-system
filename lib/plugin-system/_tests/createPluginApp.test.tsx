@@ -58,7 +58,6 @@ describe('createPluginApp', () => {
   it('should handle invalid plugins', () => {
     expect(() => {
       createPluginApp({
-        // @ts-expect-error Invalid plugin type
         plugins: [null],
         App: () => <div>Plugin App</div>,
       });
