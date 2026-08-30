@@ -4,8 +4,6 @@ export type PluginApiStoreKey = keyof PluginApiStore;
 
 export type PluginDeps = Record<string, PluginApiStoreKey>;
 
-export type PluginOptions = Record<string, unknown>;
-
 export type PluginDepsMap<D extends PluginDeps> = {
   [K in keyof D]: PluginApiStore[D[K]];
 };
@@ -13,4 +11,4 @@ export type PluginDepsMap<D extends PluginDeps> = {
 export interface PluginApiStore {}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type LoadablePlugins = readonly Plugin<PluginApiStoreKey, any, any>[];
+export type LoadablePlugins = readonly Plugin<PluginApiStoreKey, any>[];

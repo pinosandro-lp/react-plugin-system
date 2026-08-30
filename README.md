@@ -127,41 +127,6 @@ createRoot(document.getElementById('root')).render(
 );
 ```
 
-### Plugin Options
-
-Custom options can be passed to a plugin when it is created. These options are provided as the second argument to the `createPlugin` function and are then available inside the `createApiClient` method.
-
-This allows you to **configure a plugin's behavior** without modifying its internal implementation.
-
-```js
-import { createPlugin } from '@pinosandro/react-plugin-system';
-import { EXAMPLE_PLUGIN_ID } from '../example.js/example';
-
-export const DEPS_EXAMPLE_PLUGIN_ID = 'author-depsexample';
-
-export const depsExamplePlugin = createPlugin(
-  {
-    id: DEPS_EXAMPLE_PLUGIN_ID,
-    dependencies: {
-      exampleApi: EXAMPLE_PLUGIN_ID,
-    },
-    createApiClient({ exampleApi }, options) {
-      console.log(options.foo);
-
-      return {
-        anotherHelloMethod() {
-          console.log('Hello from depsExamplePlugin API Client!');
-          exampleApi.printHello();
-        },
-      };
-    },
-  },
-  {
-    foo: 'bar',
-  },
-);
-```
-
 ### Plugin Provider
 
 Use the `provider` property to add a React context to your plugin. This simplifies the integration of plugins that require their own context. The `provider` automatically wraps the application when the plugin is registered.
@@ -196,10 +161,6 @@ export interface DepsExamplePluginApi {
   anotherHelloMethod(): void;
 }
 
-export interface DepsExamplePluginOptions {
-  foo: string;
-}
-
 declare module '@pinosandro/react-plugin-system' {
   interface PluginApiStore {
     [DEPS_EXAMPLE_PLUGIN_ID]: DepsExamplePluginApi;
@@ -218,34 +179,20 @@ import { EXAMPLE_PLUGIN_ID } from '../example/example';
 
 export const DEPS_EXAMPLE_PLUGIN_ID = 'author-depsexample';
 
-/**
- * @typedef {import('./index.d.ts').DepsExamplePluginOptions} DepsExamplePluginOptions
- */
-
-export const depsExamplePlugin = createPlugin(
-  {
-    id: DEPS_EXAMPLE_PLUGIN_ID,
-    dependencies: {
-      exampleApi: EXAMPLE_PLUGIN_ID,
-    },
-    /**
-     * @param {DepsExamplePluginOptions} options
-     */
-    createApiClient({ exampleApi }, options) {
-      console.log(options.foo);
-
-      return {
-        anotherHelloMethod() {
-          console.log('Hello from depsExamplePlugin API Client!');
-          exampleApi.printHello();
-        },
-      };
-    },
+export const depsExamplePlugin = createPlugin({
+  id: DEPS_EXAMPLE_PLUGIN_ID,
+  dependencies: {
+    exampleApi: EXAMPLE_PLUGIN_ID,
   },
-  {
-    foo: 'bar',
+  createApiClient({ exampleApi }) {
+    return {
+      anotherHelloMethod() {
+        console.log('Hello from depsExamplePlugin API Client!');
+        exampleApi.printHello();
+      },
+    };
   },
-);
+});
 ```
 
 - #### Typescript
@@ -274,23 +221,16 @@ export interface DepsExamplePluginDeps {
   exampleApi: ExamplePluginApi;
 }
 
-export interface DepsExamplePluginOptions {
-  foo: string;
-}
-
 export const depsExamplePlugin = createPlugin<
   DepsExamplePluginId,
-  DepsExamplePluginDeps,
-  DepsExamplePluginOptions
+  DepsExamplePluginDeps
 >(
   {
     id: DEPS_EXAMPLE_PLUGIN_ID,
     dependencies: {
       exampleApi: EXAMPLE_PLUGIN_ID,
     },
-    createApiClient({ exampleApi }, options) {
-      console.log(options.foo);
-
+    createApiClient({ exampleApi }) {
       return {
         anotherHelloMethod() {
           console.log('Hello from depsExamplePlugin API Client!');
