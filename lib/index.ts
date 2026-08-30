@@ -1,3 +1,4 @@
+export type { Plugin, PluginApiStore } from './plugin-system';
+
+export { createPluginApp, createPlugin } from './plugin-system';
 export { usePluginApi } from './hooks';
-export { PluginProvider } from './components';
-export { Plugin, type PluginApiStore, createPluginApp } from './plugin-system';
