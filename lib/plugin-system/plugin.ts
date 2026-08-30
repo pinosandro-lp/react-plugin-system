@@ -5,7 +5,6 @@ import type {
   PluginApiStoreKey,
   PluginDeps,
   PluginDepsMap,
-  PluginOptions,
 } from './types';
 
 /**
@@ -13,20 +12,12 @@ import type {
  * Each plugin has a unique ID, optional dependencies on other plugins,
  * and a method to create its API client using the APIs of its dependencies.
  */
-export class Plugin<
-  Id extends PluginApiStoreKey,
-  Deps extends PluginDeps,
-  Options extends PluginOptions | undefined = undefined,
-> {
+export class Plugin<Id extends PluginApiStoreKey, Deps extends PluginDeps> {
   #id: Id;
   #dependencies: Deps;
-  #createApiClient: (
-    deps: PluginDepsMap<Deps>,
-    options?: Options,
-  ) => PluginApiStore[Id];
+  #createApiClient: (deps: PluginDepsMap<Deps>) => PluginApiStore[Id];
   #apiClient: Readonly<PluginApiStore[Id]> | null = null;
   #provider?: React.FC<React.PropsWithChildren>;
-  #options?: Options;
 
   /**
    * @param params - The parameters for the plugin.
@@ -34,26 +25,18 @@ export class Plugin<
    * @param params.dependencies - An optional object mapping dependency names to their plugin IDs.
    * @param params.createApiClient - A function that creates the API client for the plugin using its dependencies.
    * @param params.provider - An optional React provider component for the plugin.
-   * @param options - Custom options for the plugin, passed to the createApiClient function.
    */
-  constructor(
-    params: {
-      id: Id;
-      dependencies?: Deps;
-      createApiClient: (
-        deps: PluginDepsMap<Deps>,
-        options?: Options,
-      ) => PluginApiStore[Id];
-      provider?: React.FC<React.PropsWithChildren>;
-    },
-    options?: Options,
-  ) {
+  constructor(params: {
+    id: Id;
+    dependencies?: Deps;
+    createApiClient: (deps: PluginDepsMap<Deps>) => PluginApiStore[Id];
+    provider?: React.FC<React.PropsWithChildren>;
+  }) {
     const { id, dependencies = {} as Deps, createApiClient, provider } = params;
     this.#id = id;
     this.#dependencies = dependencies;
     this.#createApiClient = createApiClient;
     this.#provider = provider;
-    this.#options = options;
   }
 
   /** Check if the plugin is registered in the PluginManager. */
@@ -99,7 +82,7 @@ export class Plugin<
 
     if (this.#apiClient === null) {
       const deps = this.#resolveDependencies();
-      this.#apiClient = deepFreeze(this.#createApiClient(deps, this.#options));
+      this.#apiClient = deepFreeze(this.#createApiClient(deps));
     }
 
     return this.#apiClient;

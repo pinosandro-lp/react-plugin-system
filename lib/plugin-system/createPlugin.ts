@@ -1,5 +1,5 @@
 import { Plugin } from './plugin';
-import type { PluginApiStoreKey, PluginDeps, PluginOptions } from './types';
+import type { PluginApiStoreKey, PluginDeps } from './types';
 
 /**
  * Creates a new plugin instance with the specified parameters.
@@ -9,10 +9,6 @@ import type { PluginApiStoreKey, PluginDeps, PluginOptions } from './types';
 export function createPlugin<
   Id extends PluginApiStoreKey,
   Deps extends PluginDeps,
-  Options extends PluginOptions | undefined = undefined,
->(
-  param: ConstructorParameters<typeof Plugin<Id, Deps, Options>>[0],
-  options?: ConstructorParameters<typeof Plugin<Id, Deps, Options>>[1],
-): Plugin<Id, Deps, Options> {
-  return new Plugin(param, options);
+>(param: ConstructorParameters<typeof Plugin<Id, Deps>>[0]): Plugin<Id, Deps> {
+  return new Plugin(param);
 }
