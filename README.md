@@ -283,7 +283,7 @@ export const depsExamplePlugin = createPlugin({
   dependencies: {
     exampleApi: EXAMPLE_PLUGIN_ID,
   },
-  createApiClient({ exampleApi }, options) {
+  createApiClient({ exampleApi }) {
     return {
       anotherHelloMethod() {
         console.log('Hello from depsExamplePlugin API Client!');
@@ -299,7 +299,11 @@ export const depsExamplePlugin = createPlugin({
 If you're using TypeScript, the plugin declaration should be like this:
 
 ```ts
-import { createPlugin } from '@pinosandro/react-plugin-system';
+import {
+  createPlugin,
+  type PluginDeps,
+  type PluginOptions,
+} from '@pinosandro/react-plugin-system';
 import { EXAMPLE_PLUGIN_ID, type ExamplePluginApi } from '../example/example';
 
 export const DEPS_EXAMPLE_PLUGIN_ID = 'author-depsexample';
@@ -308,20 +312,20 @@ interface DepsExamplePluginApi {
   anotherHelloMethod(): void;
 }
 
+type DepsExamplePluginId = typeof DEPS_EXAMPLE_PLUGIN_ID;
+
+interface DepsExamplePluginDeps extends PluginDeps {
+  exampleApi: ExamplePluginApi;
+}
+
+interface DepsExampleOptions extends PluginOptions {
+  foo: string;
+}
+
 declare module '@pinosandro/react-plugin-system' {
   interface PluginApiStore {
     [DEPS_EXAMPLE_PLUGIN_ID]: DepsExamplePluginApi;
   }
-}
-
-export type DepsExamplePluginId = typeof DEPS_EXAMPLE_PLUGIN_ID;
-
-export interface DepsExamplePluginDeps {
-  exampleApi: ExamplePluginApi;
-}
-
-export interface DepsExampleOptions {
-  foo: string;
 }
 
 export const depsExamplePlugin = createPlugin<

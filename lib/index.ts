@@ -1,4 +1,9 @@
-export type { Plugin, PluginApiStore } from './plugin-system';
+export type {
+  Plugin,
+  PluginApiStore,
+  PluginDeps,
+  PluginOptions,
+} from './plugin-system';
 
-export { createPluginApp, createPlugin } from './plugin-system';
 export { usePluginApi } from './hooks';
+export { createPlugin, createPluginApp } from './plugin-system';
