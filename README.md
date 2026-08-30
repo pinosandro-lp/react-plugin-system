@@ -127,6 +127,105 @@ createRoot(document.getElementById('root')).render(
 );
 ```
 
+### Plugin Options
+
+Plugins can receive configuration through the `options` property when they are registered.
+
+The options are passed as the second argument to `createApiClient`. This allows the same plugin to be reused with different configurations depending on the application or environment.
+
+```js
+import { createPlugin } from '@pinosandro/react-plugin-system';
+import { EXAMPLE_PLUGIN_ID } from '../example.js/example';
+
+export const DEPS_EXAMPLE_PLUGIN_ID = 'author-depsexample';
+
+export const depsExamplePlugin = createPlugin({
+  id: DEPS_EXAMPLE_PLUGIN_ID,
+  dependencies: {
+    exampleApi: EXAMPLE_PLUGIN_ID,
+  },
+  createApiClient({ exampleApi }, options) {
+    console.log(options.foo);
+
+    return {
+      anotherHelloMethod() {
+        console.log('Hello from depsExamplePlugin API Client!');
+        exampleApi.printHello();
+      },
+    };
+  },
+});
+```
+
+Options are provided when registering the plugin by using the `plugin` and `options` properties:
+
+```jsx
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { createPluginApp } from '@pinosandro/react-plugin-system';
+import { App } from './App.jsx';
+import { depsExamplePlugin, examplePlugin } from './plugins';
+
+const PluginApp = createPluginApp({
+  plugins: [
+    examplePlugin,
+    {
+      plugin: depsExamplePlugin,
+      options: {
+        foo: 'bar',
+      },
+    },
+  ],
+  App,
+});
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <PluginApp />
+  </StrictMode>,
+);
+```
+
+This makes it possible to keep the plugin implementation generic while allowing each application to provide its own configuration.
+
+#### Handling Missing Options
+
+When a plugin defines options, it should explicitly handle cases where the expected options are not provided or are incomplete.
+
+Depending on the plugin's requirements, you can either provide sensible default values or throw an error when a required option is missing.
+
+For optional configuration, prefer using default values:
+
+```js
+createApiClient({ exampleApi }, options = {}) {
+  const foo = options.foo ?? 'default-value';
+
+  return {
+    anotherHelloMethod() {
+      console.log(foo);
+      exampleApi.printHello();
+    },
+  };
+}
+```
+
+For required configuration, fail early with a descriptive error instead:
+
+```js
+createApiClient({ exampleApi }, options = {}) {
+  const foo = options.foo ?? 'default-value';
+
+  return {
+    anotherHelloMethod() {
+      console.log(foo);
+      exampleApi.printHello();
+    },
+  };
+}
+```
+
+This is especially useful for plugins that cannot operate correctly without a specific configuration. Failing during plugin initialization makes configuration errors easier to identify and prevents the plugin from running in an invalid state.
+
 ### Plugin Provider
 
 Use the `provider` property to add a React context to your plugin. This simplifies the integration of plugins that require their own context. The `provider` automatically wraps the application when the plugin is registered.
@@ -184,7 +283,7 @@ export const depsExamplePlugin = createPlugin({
   dependencies: {
     exampleApi: EXAMPLE_PLUGIN_ID,
   },
-  createApiClient({ exampleApi }) {
+  createApiClient({ exampleApi }, options) {
     return {
       anotherHelloMethod() {
         console.log('Hello from depsExamplePlugin API Client!');
@@ -221,16 +320,23 @@ export interface DepsExamplePluginDeps {
   exampleApi: ExamplePluginApi;
 }
 
+export interface DepsExampleOptions {
+  foo: string;
+}
+
 export const depsExamplePlugin = createPlugin<
   DepsExamplePluginId,
-  DepsExamplePluginDeps
+  DepsExamplePluginDeps,
+  DepsExampleOptions
 >(
   {
     id: DEPS_EXAMPLE_PLUGIN_ID,
     dependencies: {
       exampleApi: EXAMPLE_PLUGIN_ID,
     },
-    createApiClient({ exampleApi }) {
+    createApiClient({ exampleApi }, options) {
+      console.log(options.foo);
+
       return {
         anotherHelloMethod() {
           console.log('Hello from depsExamplePlugin API Client!');

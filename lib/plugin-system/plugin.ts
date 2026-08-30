@@ -5,6 +5,7 @@ import type {
   PluginApiStoreKey,
   PluginDeps,
   PluginDepsMap,
+  PluginOptions,
 } from './types';
 
 /**
@@ -12,12 +13,20 @@ import type {
  * Each plugin has a unique ID, optional dependencies on other plugins,
  * and a method to create its API client using the APIs of its dependencies.
  */
-export class Plugin<Id extends PluginApiStoreKey, Deps extends PluginDeps> {
+export class Plugin<
+  Id extends PluginApiStoreKey,
+  Deps extends PluginDeps,
+  Options extends PluginOptions,
+> {
   #id: Id;
   #dependencies: Deps;
-  #createApiClient: (deps: PluginDepsMap<Deps>) => PluginApiStore[Id];
+  #createApiClient: (
+    deps: PluginDepsMap<Deps>,
+    options?: Options,
+  ) => PluginApiStore[Id];
   #apiClient: Readonly<PluginApiStore[Id]> | null = null;
   #provider?: React.FC<React.PropsWithChildren>;
+  #options: Options | undefined = undefined;
 
   /**
    * @param params - The parameters for the plugin.
@@ -29,7 +38,10 @@ export class Plugin<Id extends PluginApiStoreKey, Deps extends PluginDeps> {
   constructor(params: {
     id: Id;
     dependencies?: Deps;
-    createApiClient: (deps: PluginDepsMap<Deps>) => PluginApiStore[Id];
+    createApiClient: (
+      deps: PluginDepsMap<Deps>,
+      options?: Options,
+    ) => PluginApiStore[Id];
     provider?: React.FC<React.PropsWithChildren>;
   }) {
     const { id, dependencies = {} as Deps, createApiClient, provider } = params;
@@ -64,6 +76,15 @@ export class Plugin<Id extends PluginApiStoreKey, Deps extends PluginDeps> {
     }, {} as PluginDepsMap<Deps>);
   }
 
+  /** Set the plugin options. */
+  setOptions(options: Options): void {
+    if (!this.#options) {
+      this.#options = options;
+    } else {
+      throw new Error(`Options for plugin ${this.id} are already set.`);
+    }
+  }
+
   /** The unique identifier of the plugin. */
   get id(): Id {
     return this.#id;
@@ -82,7 +103,7 @@ export class Plugin<Id extends PluginApiStoreKey, Deps extends PluginDeps> {
 
     if (this.#apiClient === null) {
       const deps = this.#resolveDependencies();
-      this.#apiClient = deepFreeze(this.#createApiClient(deps));
+      this.#apiClient = deepFreeze(this.#createApiClient(deps, this.#options));
     }
 
     return this.#apiClient;

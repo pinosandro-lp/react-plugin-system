@@ -5,6 +5,8 @@ import {
   dependencyTestPlugin,
   TEST_PLUGIN_ID,
   testPlugin,
+  WITH_OPTIONS_PLUGIN_ID,
+  withOptionsPlugin,
 } from '../../utils/tests';
 
 describe('PluginManager class', () => {
@@ -113,5 +115,26 @@ describe('PluginManager class', () => {
     pluginManager.clear();
 
     expect(pluginManager.plugins).toHaveLength(0);
+  });
+
+  it('should set options for a plugin when loading it', () => {
+    const pluginManager = PluginManager.getInstance();
+
+    const options = {
+      option1: 'value1',
+      option2: 42,
+    };
+
+    pluginManager.load([
+      {
+        plugin: withOptionsPlugin,
+        options,
+      },
+    ]);
+
+    const loadedPlugin = pluginManager.getById(WITH_OPTIONS_PLUGIN_ID);
+
+    expect(loadedPlugin).toBeDefined();
+    expect(loadedPlugin?.api.getOptions()).toEqual(options);
   });
 });

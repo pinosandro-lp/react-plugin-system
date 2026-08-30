@@ -1,7 +1,7 @@
 import { PluginProvider } from '../components';
 import { composeProviders, extractPluginProviders } from '../utils';
 import { PluginManager } from './pluginManager';
-import type { LoadablePlugins } from './types';
+import type { LoadablePlugin } from './types';
 
 /**
  * Decorates the main application component with the plugins system.
@@ -10,8 +10,12 @@ import type { LoadablePlugins } from './types';
  * @param params.App - The main application component.
  * @returns A React component that provides the plugin manager context.
  */
-export function createPluginApp(params: {
-  plugins: LoadablePlugins;
+export function createPluginApp<const P extends readonly unknown[]>(params: {
+  plugins: readonly [
+    ...{
+      [K in keyof P]: LoadablePlugin<P[K]>;
+    },
+  ];
   App: React.FC;
 }): React.FC {
   const { plugins, App } = params;
