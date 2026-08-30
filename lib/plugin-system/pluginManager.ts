@@ -1,5 +1,10 @@
 import type { Plugin } from './plugin';
-import type { PluginApiStoreKey, PluginDeps, LoadablePlugins } from './types';
+import type {
+  PluginApiStoreKey,
+  PluginDeps,
+  LoadablePlugins,
+  PluginOptions,
+} from './types';
 
 /**
  * Singleton class to manage the registration and loading of plugins.
@@ -9,8 +14,11 @@ export class PluginManager {
   private static pm: PluginManager;
   private pluginMap: Map<
     PluginApiStoreKey,
-    Plugin<PluginApiStoreKey, PluginDeps>
-  > = new Map<PluginApiStoreKey, Plugin<PluginApiStoreKey, PluginDeps>>();
+    Plugin<PluginApiStoreKey, PluginDeps, PluginOptions>
+  > = new Map<
+    PluginApiStoreKey,
+    Plugin<PluginApiStoreKey, PluginDeps, PluginOptions>
+  >();
 
   private constructor() {}
 
@@ -25,7 +33,9 @@ export class PluginManager {
   /** Register a single plugin.
    * @param plugin - The plugin to be registered.
    */
-  private register(plugin: Plugin<PluginApiStoreKey, PluginDeps>): void {
+  private register(
+    plugin: Plugin<PluginApiStoreKey, PluginDeps, PluginOptions>,
+  ): void {
     const isRegistred = this.pluginMap.has(plugin.id);
 
     if (isRegistred)
@@ -53,7 +63,7 @@ export class PluginManager {
   }
 
   /** Get all registered plugins. */
-  get plugins(): Plugin<PluginApiStoreKey, PluginDeps>[] {
+  get plugins(): Plugin<PluginApiStoreKey, PluginDeps, PluginOptions>[] {
     return [...this.pluginMap.values()];
   }
 
@@ -63,8 +73,10 @@ export class PluginManager {
    */
   getById<Id extends PluginApiStoreKey>(
     id: Id,
-  ): Plugin<Id, PluginDeps> | undefined {
-    return this.pluginMap.get(id) as Plugin<Id, PluginDeps> | undefined;
+  ): Plugin<Id, PluginDeps, PluginOptions> | undefined {
+    return this.pluginMap.get(id) as
+      | Plugin<Id, PluginDeps, PluginOptions>
+      | undefined;
   }
 
   /** Clear all registered plugins (for testing purposes). */
