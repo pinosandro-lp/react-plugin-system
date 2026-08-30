@@ -4,7 +4,7 @@ A plugin-based approach focuses on features and promotes a more intuitive, clear
 
 The goal of this library is to provide a **lightweight**, **flexible**, and **minimal** plugin system for React, with no external constraints or dependencies beyond React itself.
 
-Whether you use it in a traditional project, a monorepo, or with separate repositories for each plugin, there’s no wrong way to use this library.
+Whether you use it in a traditional React project, a monorepo, or across separate repositories, the library is designed to adapt to your architecture without imposing a specific project structure.
 
 ## Installation
 
@@ -20,15 +20,15 @@ The `react-plugin-system` allows you to extend your application by creating and 
 
 ### Create a Plugin
 
-It is possible to create a new plugin using the `Plugin` class. Each plugin should have a **unique ID**, following the naming convention `author-pluginname`. The `createApiClient` function defines the plugin's API.
+A plugin can be created using the `createPlugin` function. Each plugin should have a **unique ID**, following the naming convention `author-pluginname`. The `createApiClient` function defines the plugin's API.
 
 ```js
-import { Plugin } from '@pinosandro/react-plugin-system';
+import { createPlugin } from '@pinosandro/react-plugin-system';
 
 // naming convention: author-pluginname
 export const EXAMPLE_PLUGIN_ID = 'author-example';
 
-export const examplePlugin = new Plugin({
+export const examplePlugin = createPlugin({
   id: EXAMPLE_PLUGIN_ID,
   createApiClient() {
     return {
@@ -63,7 +63,7 @@ createRoot(document.getElementById('root')).render(
 );
 ```
 
-### Consume the Plugin Api
+### Consume the Plugin API
 
 You can access the **registered plugin's API** by passing its **unique ID** to the `usePluginApi` hook.
 
@@ -85,12 +85,12 @@ export function App() {
 A plugin **can depend on other plugins** if it uses them internally. Here’s an example of how to define such a plugin:
 
 ```js
-import { Plugin } from '@pinosandro/react-plugin-system';
+import { createPlugin } from '@pinosandro/react-plugin-system';
 import { EXAMPLE_PLUGIN_ID } from '../example.js/example';
 
 export const DEPS_EXAMPLE_PLUGIN_ID = 'author-depsexample';
 
-export const depsExamplePlugin = new Plugin({
+export const depsExamplePlugin = createPlugin({
   id: DEPS_EXAMPLE_PLUGIN_ID,
   dependencies: {
     exampleApi: EXAMPLE_PLUGIN_ID,
@@ -127,19 +127,54 @@ createRoot(document.getElementById('root')).render(
 );
 ```
 
-### Plugin Provider
+### Plugin Options
 
-It is possible to add a React context through the `provider` property. This extends, simplifies, and speeds up the integration of plugins that require context. The `provider` automatically wraps the application when the plugin is registered in the app.
+Custom options can be passed to a plugin when it is created. These options are provided as the second argument to the `createPlugin` function and are then available inside the `createApiClient` method.
 
-If multiple plugins define a provider, each provider will wrap the previous one, following the order in which the plugins are registered.
+This allows you to **configure a plugin's behavior** without modifying its internal implementation.
 
 ```js
-import { Plugin } from '@pinosandro/react-plugin-system';
+import { createPlugin } from '@pinosandro/react-plugin-system';
+import { EXAMPLE_PLUGIN_ID } from '../example.js/example';
+
+export const DEPS_EXAMPLE_PLUGIN_ID = 'author-depsexample';
+
+export const depsExamplePlugin = createPlugin(
+  {
+    id: DEPS_EXAMPLE_PLUGIN_ID,
+    dependencies: {
+      exampleApi: EXAMPLE_PLUGIN_ID,
+    },
+    createApiClient({ exampleApi }, options) {
+      console.log(options.foo);
+
+      return {
+        anotherHelloMethod() {
+          console.log('Hello from depsExamplePlugin API Client!');
+          exampleApi.printHello();
+        },
+      };
+    },
+  },
+  {
+    foo: 'bar',
+  },
+);
+```
+
+### Plugin Provider
+
+Use the `provider` property to add a React context to your plugin. This simplifies the integration of plugins that require their own context. The `provider` automatically wraps the application when the plugin is registered.
+
+If multiple plugins define a provider, each provider wraps the previous one, following the order in which the plugins are registered.
+
+```js
+import { createPlugin } from '@pinosandro/react-plugin-system';
 import { createApiClient } from './plugin.client';
 
 export const FEEDBACK_PLUGIN_ID = 'pinosandro-feedback';
 
-export const feedbackPlugin = new Plugin({
+export const feedbackPlugin = createPlugin({
   id: FEEDBACK_PLUGIN_ID,
   createApiClient,
   provider: FeedbackProvider,
@@ -157,8 +192,12 @@ For each plugin, create a `.d.ts` file following this example:
 ```ts
 import { DEPS_EXAMPLE_PLUGIN_ID } from './depsExample';
 
-interface DepsExamplePluginApi {
+export interface DepsExamplePluginApi {
   anotherHelloMethod(): void;
+}
+
+export interface DepsExamplePluginOptions {
+  foo: string;
 }
 
 declare module '@pinosandro/react-plugin-system' {
@@ -174,25 +213,39 @@ Once the declaration file is created, you can **reference** it directly in your 
 // @ts-check
 /// <reference path="./index.d.ts" />
 
-import { Plugin } from '@pinosandro/react-plugin-system';
-import { EXAMPLE_PLUGIN_ID } from '../example.js/example';
+import { createPlugin } from '@pinosandro/react-plugin-system';
+import { EXAMPLE_PLUGIN_ID } from '../example/example';
 
 export const DEPS_EXAMPLE_PLUGIN_ID = 'author-depsexample';
 
-export const depsExamplePlugin = new Plugin({
-  id: DEPS_EXAMPLE_PLUGIN_ID,
-  dependencies: {
-    exampleApi: EXAMPLE_PLUGIN_ID,
+/**
+ * @typedef {import('./index.d.ts').DepsExamplePluginOptions} DepsExamplePluginOptions
+ */
+
+export const depsExamplePlugin = createPlugin(
+  {
+    id: DEPS_EXAMPLE_PLUGIN_ID,
+    dependencies: {
+      exampleApi: EXAMPLE_PLUGIN_ID,
+    },
+    /**
+     * @param {DepsExamplePluginOptions} options
+     */
+    createApiClient({ exampleApi }, options) {
+      console.log(options.foo);
+
+      return {
+        anotherHelloMethod() {
+          console.log('Hello from depsExamplePlugin API Client!');
+          exampleApi.printHello();
+        },
+      };
+    },
   },
-  createApiClient({ exampleApi }) {
-    return {
-      anotherHelloMethod() {
-        console.log('Hello from depsExamplePlugin API Client!');
-        exampleApi.printHello();
-      },
-    };
+  {
+    foo: 'bar',
   },
-});
+);
 ```
 
 - #### Typescript
@@ -200,8 +253,8 @@ export const depsExamplePlugin = new Plugin({
 If you're using TypeScript, the plugin declaration should be like this:
 
 ```ts
-import { Plugin } from '@pinosandro/react-plugin-system';
-import { EXAMPLE_PLUGIN_ID } from '../example/example';
+import { createPlugin } from '@pinosandro/react-plugin-system';
+import { EXAMPLE_PLUGIN_ID, type ExamplePluginApi } from '../example/example';
 
 export const DEPS_EXAMPLE_PLUGIN_ID = 'author-depsexample';
 
@@ -215,25 +268,46 @@ declare module '@pinosandro/react-plugin-system' {
   }
 }
 
-export const depsExamplePlugin = new Plugin({
-  id: DEPS_EXAMPLE_PLUGIN_ID,
-  dependencies: {
-    exampleApi: EXAMPLE_PLUGIN_ID,
+export type DepsExamplePluginId = typeof DEPS_EXAMPLE_PLUGIN_ID;
+
+export interface DepsExamplePluginDeps {
+  exampleApi: ExamplePluginApi;
+}
+
+export interface DepsExamplePluginOptions {
+  foo: string;
+}
+
+export const depsExamplePlugin = createPlugin<
+  DepsExamplePluginId,
+  DepsExamplePluginDeps,
+  DepsExamplePluginOptions
+>(
+  {
+    id: DEPS_EXAMPLE_PLUGIN_ID,
+    dependencies: {
+      exampleApi: EXAMPLE_PLUGIN_ID,
+    },
+    createApiClient({ exampleApi }, options) {
+      console.log(options.foo);
+
+      return {
+        anotherHelloMethod() {
+          console.log('Hello from depsExamplePlugin API Client!');
+          exampleApi.printHello();
+        },
+      };
+    },
   },
-  createApiClient({ exampleApi }) {
-    return {
-      anotherHelloMethod() {
-        console.log('Hello from depsExamplePlugin API Client!');
-        exampleApi.printHello();
-      },
-    };
+  {
+    foo: 'bar',
   },
-});
+);
 ```
 
 ### End Notes
 
-The plugin API client is **fully customizable** to fit your specific needs. It can include not only utility functions but also, for example, **React components and hooks** that can be accessed via `usePluginApi`.
+The plugin API is **fully customizable** to fit your specific needs. It can include utility functions and services, and in some cases, **React components and hooks** that can be accessed via `usePluginApi`.
 
 However, exposing React components or hooks through the API is generally **discouraged**, except for **special cases**. The plugin API is primarily intended to expose **functionality and services**, while components and hooks are better kept as part of the plugin's UI and can be exported directly from the plugin when they need to be consumed by the application.
 

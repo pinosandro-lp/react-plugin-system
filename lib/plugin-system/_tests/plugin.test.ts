@@ -1,21 +1,36 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { Plugin } from '../plugin';
-import { PluginManager } from '../pluginManager';
 import {
+  DEFAULT_OPTIONS,
   dependencyTestPlugin,
+  errorOptionsPlugin,
   NOT_REGISTRED_PLUGIN_ID,
   notRegistredPlugin,
-  type NotRegistredPluginApi,
+  OPTIONS_ERROR_MESSAGE,
+  OPTIONS_PARAM,
+  PARTIAL_OPTIONS,
   TEST_PLUGIN_ID,
   testPlugin,
+  withOptionalOptionsPlugin,
+  withOptionsPlugin,
+  withPartialOptionsPlugin,
   withProviderPlugin,
+  type NotRegistredPluginApi,
 } from '../../utils/tests';
+import { Plugin } from '../plugin';
+import { PluginManager } from '../pluginManager';
 
 describe('Plugin class', () => {
   const pluginManager = PluginManager.getInstance();
 
   beforeAll(() => {
-    pluginManager.load([testPlugin, dependencyTestPlugin]);
+    pluginManager.load([
+      testPlugin,
+      dependencyTestPlugin,
+      withOptionsPlugin,
+      withPartialOptionsPlugin,
+      withOptionalOptionsPlugin,
+      errorOptionsPlugin,
+    ]);
   });
 
   afterAll(() => {
@@ -58,5 +73,34 @@ describe('Plugin class', () => {
 
   it('should return the provided provider', () => {
     expect(withProviderPlugin.provider).toBeDefined();
+  });
+
+  it('should throw an error when accessing the API of a plugin with required options but no options provided', () => {
+    const fn = (): void => {
+      errorOptionsPlugin.api.getOptions();
+    };
+
+    expect(fn).toThrow(OPTIONS_ERROR_MESSAGE);
+  });
+
+  it('should return the provided options', () => {
+    const options = withOptionsPlugin.api.getOptions();
+
+    expect(options.option1).toBe(OPTIONS_PARAM.option1);
+    expect(options.option2).toBe(OPTIONS_PARAM.option2);
+  });
+
+  it('should return the provided options when partial options are provided', () => {
+    const options = withPartialOptionsPlugin.api.getOptions();
+
+    expect(options.option1).toBe(PARTIAL_OPTIONS.option1);
+    expect(options.option2).toBe(DEFAULT_OPTIONS.option2);
+  });
+
+  it('should return the default options when no options are provided', () => {
+    const options = withOptionalOptionsPlugin.api.getOptions();
+
+    expect(options.option1).toBe(DEFAULT_OPTIONS.option1);
+    expect(options.option2).toBe(DEFAULT_OPTIONS.option2);
   });
 });
