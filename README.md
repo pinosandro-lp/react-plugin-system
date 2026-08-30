@@ -4,7 +4,7 @@ A plugin-based approach focuses on features and promotes a more intuitive, clear
 
 The goal of this library is to provide a **lightweight**, **flexible**, and **minimal** plugin system for React, with no external constraints or dependencies beyond React itself.
 
-Whether you use it in a traditional project, a monorepo, or with separate repositories for each plugin, there’s no wrong way to use this library.
+Whether you use it in a traditional React project, a monorepo, or across separate repositories, the library is designed to adapt to your architecture without imposing a specific project structure.
 
 ## Installation
 
@@ -63,7 +63,7 @@ createRoot(document.getElementById('root')).render(
 );
 ```
 
-### Consume the Plugin Api
+### Consume the Plugin API
 
 You can access the **registered plugin's API** by passing its **unique ID** to the `usePluginApi` hook.
 
@@ -124,6 +124,41 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <PluginApp />
   </StrictMode>,
+);
+```
+
+### Plugin Options
+
+Custom options can be passed to a plugin when it is created. These options are provided as the second argument to the `Plugin` constructor and are then available inside the `createApiClient` method.
+
+This allows you to **configure a plugin's behavior** without modifying its internal implementation.
+
+```js
+import { Plugin } from '@pinosandro/react-plugin-system';
+import { EXAMPLE_PLUGIN_ID } from '../example.js/example';
+
+export const DEPS_EXAMPLE_PLUGIN_ID = 'author-depsexample';
+
+export const depsExamplePlugin = new Plugin(
+  {
+    id: DEPS_EXAMPLE_PLUGIN_ID,
+    dependencies: {
+      exampleApi: EXAMPLE_PLUGIN_ID,
+    },
+    createApiClient({ exampleApi }, options) {
+      console.log(options.foo);
+
+      return {
+        anotherHelloMethod() {
+          console.log('Hello from depsExamplePlugin API Client!');
+          exampleApi.printHello();
+        },
+      };
+    },
+  },
+  {
+    foo: 'bar',
+  },
 );
 ```
 
@@ -215,20 +250,39 @@ declare module '@pinosandro/react-plugin-system' {
   }
 }
 
-export const depsExamplePlugin = new Plugin({
-  id: DEPS_EXAMPLE_PLUGIN_ID,
-  dependencies: {
-    exampleApi: EXAMPLE_PLUGIN_ID,
-  },
-  createApiClient({ exampleApi }) {
-    return {
-      anotherHelloMethod() {
-        console.log('Hello from depsExamplePlugin API Client!');
-        exampleApi.printHello();
-      },
-    };
-  },
-});
+export type DepsExamplePluginId = typeof DEPS_EXAMPLE_PLUGIN_ID;
+
+export interface DepsExamplePluginDeps {
+  exampleApi: ExamplePluginApi;
+}
+
+export interface DepsExamplePluginOptions {
+  foo: string;
+}
+
+export const depsExamplePlugin =
+  new Plugin<
+    DepsExamplePluginId,
+    DepsExamplePluginDeps,
+    DepsExamplePluginOptions
+  >()
+  {
+    id: DEPS_EXAMPLE_PLUGIN_ID,
+    dependencies: {
+      exampleApi: EXAMPLE_PLUGIN_ID,
+    },
+    createApiClient({ exampleApi }) {
+      return {
+        anotherHelloMethod() {
+          console.log('Hello from depsExamplePlugin API Client!');
+          exampleApi.printHello();
+        },
+      };
+    },
+    {
+      foo: 'bar'
+    }
+  };
 ```
 
 ### End Notes
