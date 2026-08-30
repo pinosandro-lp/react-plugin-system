@@ -1,13 +1,29 @@
-import type { LoadablePlugins } from '../plugin-system';
+import type { LoadablePlugin } from '../plugin-system';
 
 function isDefined<T>(value?: T): value is T {
   return value != null;
 }
 
-export function extractPluginProviders(
-  plugins: LoadablePlugins,
+export function extractPluginProviders<const P extends readonly unknown[]>(
+  plugins: readonly [
+    ...{
+      [K in keyof P]: LoadablePlugin<P[K]>;
+    },
+  ],
 ): React.FC<React.PropsWithChildren>[] {
-  return plugins.map(plugin => plugin.provider).filter(isDefined);
+  return plugins
+    .map(lp => {
+      if (typeof lp === 'object' && lp != null && 'provider' in lp) {
+        return (lp as { provider: React.FC<React.PropsWithChildren> }).provider;
+      }
+      if (typeof lp === 'object' && lp != null && 'plugin' in lp) {
+        return (
+          lp as { plugin: { provider: React.FC<React.PropsWithChildren> } }
+        ).plugin?.provider;
+      }
+      return undefined;
+    })
+    .filter(isDefined);
 }
 
 export function composeProviders(

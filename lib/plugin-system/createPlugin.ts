@@ -1,5 +1,11 @@
 import { Plugin } from './plugin';
-import type { PluginApiStoreKey, PluginDeps } from './types';
+import type {
+  PluginApiStore,
+  PluginApiStoreKey,
+  PluginDeps,
+  PluginDepsMap,
+  PluginOptions,
+} from './types';
 
 /**
  * Creates a new plugin instance with the specified parameters.
@@ -8,7 +14,13 @@ import type { PluginApiStoreKey, PluginDeps } from './types';
  */
 export function createPlugin<
   Id extends PluginApiStoreKey,
-  Deps extends PluginDeps,
->(param: ConstructorParameters<typeof Plugin<Id, Deps>>[0]): Plugin<Id, Deps> {
+  Deps extends PluginDeps = {},
+  Options extends PluginOptions = PluginOptions,
+>(param: {
+  id: Id;
+  dependencies?: Deps;
+  createApiClient: (deps: PluginDepsMap<Deps>) => PluginApiStore[Id];
+  provider?: React.FC<React.PropsWithChildren>;
+}): Plugin<Id, Deps, Options> {
   return new Plugin(param);
 }

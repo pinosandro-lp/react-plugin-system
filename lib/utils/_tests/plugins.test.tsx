@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { composeProviders, extractPluginProviders } from '../plugins';
 import { testPlugin, withProviderPlugin } from '../../utils/tests';
 import { render } from '@testing-library/react';
+import { type LoadablePluginProvider } from '../../plugin-system';
 
 describe('extractPluginProviders function', () => {
   it('should extract providers from plugins', () => {
@@ -11,6 +12,36 @@ describe('extractPluginProviders function', () => {
 
     expect(providers).toHaveLength(1);
 
+    expect(providers[0]).toBe(withProviderPlugin.provider);
+  });
+
+  it('should return an empty array if no providers are found', () => {
+    const plugins = [testPlugin];
+
+    const providers = extractPluginProviders(plugins);
+
+    expect(providers).toHaveLength(0);
+  });
+
+  it('should return an empty array if no plugins are provided', () => {
+    const plugins: LoadablePluginProvider[] = [];
+
+    const providers = extractPluginProviders(plugins);
+
+    expect(providers).toHaveLength(0);
+  });
+
+  it('should get providers if plugins has options', () => {
+    const plugins: LoadablePluginProvider[] = [
+      {
+        plugin: withProviderPlugin,
+        options: { someOption: true },
+      },
+    ];
+
+    const providers = extractPluginProviders(plugins);
+
+    expect(providers).toHaveLength(1);
     expect(providers[0]).toBe(withProviderPlugin.provider);
   });
 });

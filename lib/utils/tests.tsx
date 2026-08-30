@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plugin } from '../plugin-system';
+import { Plugin, type PluginOptions } from '../plugin-system';
 
 export interface TestPluginApi {
   foo(): string;
@@ -15,10 +15,20 @@ export interface NotRegistredPluginApi {
 
 export interface WithProviderPluginApi {}
 
+export interface WithOptionsPluginApi {
+  getOptions(): Record<string, unknown>;
+}
+
+export interface ExamplePluginOptions extends PluginOptions {
+  option1: string;
+  option2: number;
+}
+
 export const TEST_PLUGIN_ID = 'test.plugin';
 export const DEPENDENCY_TEST_PLUGIN_ID = 'dependency_test.plugin';
 export const NOT_REGISTRED_PLUGIN_ID = 'not_registred.plugin';
 export const WITH_PROVIDER_PLUGIN_ID = 'with_provider.plugin';
+export const WITH_OPTIONS_PLUGIN_ID = 'with_options.plugin';
 
 declare module '../plugin-system' {
   interface PluginApiStore {
@@ -26,6 +36,7 @@ declare module '../plugin-system' {
     [DEPENDENCY_TEST_PLUGIN_ID]: DependencyTestPluginApi;
     [NOT_REGISTRED_PLUGIN_ID]: NotRegistredPluginApi;
     [WITH_PROVIDER_PLUGIN_ID]: WithProviderPluginApi;
+    [WITH_OPTIONS_PLUGIN_ID]: WithOptionsPluginApi;
   }
 }
 
@@ -71,5 +82,23 @@ export const withProviderPlugin = new Plugin({
         {children}
       </div>
     );
+  },
+});
+
+export const withOptionsPlugin = new Plugin<
+  typeof WITH_OPTIONS_PLUGIN_ID,
+  {},
+  ExamplePluginOptions
+>({
+  id: WITH_OPTIONS_PLUGIN_ID,
+  createApiClient(_: {}, options): WithOptionsPluginApi {
+    options = options ?? {
+      option1: 'default1',
+      option2: 0,
+    };
+
+    return {
+      getOptions: () => options,
+    };
   },
 });
