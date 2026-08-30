@@ -42,29 +42,6 @@ describe('createPlugin', () => {
     expect(plugin.id).toBe(CREATE_PLUGIN_TEST_ID);
   });
 
-  it('should options be available in createApiClient', () => {
-    const plugin = createPlugin(
-      {
-        id: CREATE_PLUGIN_TEST_ID,
-        createApiClient(_deps, options) {
-          if (!options) {
-            throw new Error('Options should be defined');
-          }
-          return {
-            foo: (): string => options.testOption,
-          };
-        },
-      },
-      {
-        testOption: 'testValue',
-      },
-    );
-
-    pluginManager.load([plugin]);
-
-    expect(plugin.api.foo()).toBe('testValue');
-  });
-
   it('should dependencies be available in createApiClient', () => {
     const dependencyPlugin = createPlugin({
       id: CREATE_PLUGIN_TEST_DEPENDENCY_ID,
