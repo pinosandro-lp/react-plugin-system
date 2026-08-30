@@ -1,4 +1,4 @@
-import react from '@vitejs/plugin-react-swc';
+import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import dts from 'vite-plugin-dts';
@@ -18,12 +18,12 @@ export default defineConfig({
     copyPublicDir: false,
     emptyOutDir: true,
     lib: {
-      entry: resolve(__dirname, 'lib/index.ts'),
+      entry: resolve(import.meta.dirname, 'lib/index.ts'),
       formats: ['es'],
       fileName: 'index',
     },
     rollupOptions: {
       external: ['react', 'react-dom', 'react/jsx-runtime'],
     },
-  }
+  },
 });
