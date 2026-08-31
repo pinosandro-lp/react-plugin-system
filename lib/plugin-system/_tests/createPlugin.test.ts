@@ -69,4 +69,21 @@ describe('createPlugin', () => {
     expect(plugin.api.foo()).toBe('foo');
     expect(dependencyPlugin.api.bar()).toBe('bar: foo');
   });
+
+  it('should pass options to createApiClient', () => {
+    const plugin = createPlugin({
+      id: CREATE_PLUGIN_TEST_ID,
+      createApiClient(_deps, options) {
+        return {
+          foo: (): string => `foo: ${options?.prefix}`,
+        };
+      },
+    });
+
+    plugin.setOptions({ prefix: 'test' });
+
+    pluginManager.load([plugin]);
+
+    expect(plugin.api.foo()).toBe('foo: test');
+  });
 });

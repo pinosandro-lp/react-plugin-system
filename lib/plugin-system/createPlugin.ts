@@ -19,7 +19,10 @@ export function createPlugin<
 >(param: {
   id: Id;
   dependencies?: Deps;
-  createApiClient: (deps: PluginDepsMap<Deps>) => PluginApiStore[Id];
+  createApiClient: (
+    deps: PluginDepsMap<Deps>,
+    options?: Options,
+  ) => PluginApiStore[Id];
   provider?: React.FC<React.PropsWithChildren>;
 }): Plugin<Id, Deps, Options> {
   return new Plugin(param);
