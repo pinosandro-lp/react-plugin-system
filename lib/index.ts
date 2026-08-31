@@ -2,6 +2,7 @@ export type {
   Plugin,
   PluginApiStore,
   PluginDeps,
+  PluginDepsMap,
   PluginOptions,
 } from './plugin-system';
 
