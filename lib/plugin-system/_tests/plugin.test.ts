@@ -59,4 +59,15 @@ describe('Plugin class', () => {
   it('should return the provided provider', () => {
     expect(withProviderPlugin.provider).toBeDefined();
   });
+
+  it('should thow an error if a plugin tries to set options more than once', () => {
+    const fn = (): void => {
+      withProviderPlugin.setOptions({ option1: 'value1', option2: 1 });
+      withProviderPlugin.setOptions({ option1: 'value2', option2: 2 });
+    };
+
+    expect(fn).toThrow(
+      `Options for plugin ${withProviderPlugin.id} are already set.`,
+    );
+  });
 });

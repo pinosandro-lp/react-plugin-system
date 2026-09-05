@@ -24,11 +24,11 @@ export interface ExamplePluginOptions extends PluginOptions {
   option2: number;
 }
 
-export const TEST_PLUGIN_ID = 'test.plugin';
-export const DEPENDENCY_TEST_PLUGIN_ID = 'dependency_test.plugin';
-export const NOT_REGISTRED_PLUGIN_ID = 'not_registred.plugin';
-export const WITH_PROVIDER_PLUGIN_ID = 'with_provider.plugin';
-export const WITH_OPTIONS_PLUGIN_ID = 'with_options.plugin';
+export const TEST_PLUGIN_ID = '@pinsoandro/test-plugin';
+export const DEPENDENCY_TEST_PLUGIN_ID = '@pinsoandro/dependency-test-plugin';
+export const NOT_REGISTRED_PLUGIN_ID = '@pinsoandro/not-registred-plugin';
+export const WITH_PROVIDER_PLUGIN_ID = '@pinsoandro/with-provider-plugin';
+export const WITH_OPTIONS_PLUGIN_ID = '@pinsoandro/with-options-plugin';
 
 declare module '../plugin-system' {
   interface PluginApiStore {

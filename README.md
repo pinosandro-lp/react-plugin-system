@@ -20,13 +20,13 @@ The `react-plugin-system` allows you to extend your application by creating and 
 
 ### Create a Plugin
 
-A plugin can be created using the `createPlugin` function. Each plugin should have a **unique ID**, following the naming convention `author-pluginname`. The `createApiClient` function defines the plugin's API.
+A plugin can be created using the `createPlugin` function. Each plugin should have a **unique ID**, following the naming convention `@author/name-plugin`. The `createApiClient` function defines the plugin's API.
 
 ```js
 import { createPlugin } from '@pinosandro/react-plugin-system';
 
-// naming convention: author-pluginname
-export const EXAMPLE_PLUGIN_ID = 'author-example';
+// naming convention: @author/name-plugin
+export const EXAMPLE_PLUGIN_ID = '@author/example-plugin';
 
 export const examplePlugin = createPlugin({
   id: EXAMPLE_PLUGIN_ID,
@@ -88,7 +88,7 @@ A plugin **can depend on other plugins** if it uses them internally. Here’s an
 import { createPlugin } from '@pinosandro/react-plugin-system';
 import { EXAMPLE_PLUGIN_ID } from '../example.js/example';
 
-export const DEPS_EXAMPLE_PLUGIN_ID = 'author-depsexample';
+export const DEPS_EXAMPLE_PLUGIN_ID = '@author/deps-example-plugin';
 
 export const depsExamplePlugin = createPlugin({
   id: DEPS_EXAMPLE_PLUGIN_ID,
@@ -129,7 +129,7 @@ createRoot(document.getElementById('root')).render(
 
 ### Plugin Options
 
-Plugins can receive configuration through the `options` property when they are registered.
+Plugins can receive configuration through `options` provided when they are registered.
 
 The options are passed as the second argument to `createApiClient`. This allows the same plugin to be reused with different configurations depending on the application or environment.
 
@@ -137,7 +137,7 @@ The options are passed as the second argument to `createApiClient`. This allows 
 import { createPlugin } from '@pinosandro/react-plugin-system';
 import { EXAMPLE_PLUGIN_ID } from '../example.js/example';
 
-export const DEPS_EXAMPLE_PLUGIN_ID = 'author-depsexample';
+export const DEPS_EXAMPLE_PLUGIN_ID = '@author/deps-example-plugin';
 
 export const depsExamplePlugin = createPlugin({
   id: DEPS_EXAMPLE_PLUGIN_ID,
@@ -157,24 +157,24 @@ export const depsExamplePlugin = createPlugin({
 });
 ```
 
-Options are provided when registering the plugin by using the `plugin` and `options` properties:
+Options are provided when registering the plugin by using the `configurePlugin` function:
 
 ```jsx
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { createPluginApp } from '@pinosandro/react-plugin-system';
+import {
+  createPluginApp,
+  configurePlugin,
+} from '@pinosandro/react-plugin-system';
 import { App } from './App.jsx';
 import { depsExamplePlugin, examplePlugin } from './plugins';
 
 const PluginApp = createPluginApp({
   plugins: [
     examplePlugin,
-    {
-      plugin: depsExamplePlugin,
-      options: {
-        foo: 'bar',
-      },
-    },
+    configurePlugin(depsExamplePlugin, {
+      foo: 'bar',
+    }),
   ],
   App,
 });
@@ -213,7 +213,13 @@ For required configuration, fail early with a descriptive error instead:
 
 ```js
 createApiClient({ exampleApi }, options = {}) {
-  const foo = options.foo ?? 'default-value';
+  const foo = options.foo;
+
+  if (foo === undefined) {
+    throw new Error(
+      `${DEPS_EXAMPLE_PLUGIN_ID}: "foo" option is required`,
+    );
+  }
 
   return {
     anotherHelloMethod() {
@@ -230,19 +236,31 @@ This is especially useful for plugins that cannot operate correctly without a sp
 
 Use the `provider` property to add a React context to your plugin. This simplifies the integration of plugins that require their own context. The `provider` automatically wraps the application when the plugin is registered.
 
-If multiple plugins define a provider, each provider wraps the previous one, following the order in which the plugins are registered.
-
 ```js
 import { createPlugin } from '@pinosandro/react-plugin-system';
 import { createApiClient } from './plugin.client';
 
-export const FEEDBACK_PLUGIN_ID = 'pinosandro-feedback';
+export const FEEDBACK_PLUGIN_ID = '@author/feedback-plugin';
 
 export const feedbackPlugin = createPlugin({
   id: FEEDBACK_PLUGIN_ID,
   createApiClient,
   provider: FeedbackProvider,
 });
+```
+
+If multiple plugins define a provider, each provider wraps the previously registered plugin, following the order in which the plugins are registered.
+
+```js
+// plugins: [pluginA, pluginB, pluginC]
+
+<ProviderA>
+  <ProviderB>
+    <ProviderC>
+      <App />
+    </ProviderC>
+  </ProviderB>
+</ProviderA>
 ```
 
 ### Types
@@ -276,7 +294,7 @@ Once the declaration file is created, you can **reference** it directly in your 
 import { createPlugin } from '@pinosandro/react-plugin-system';
 import { EXAMPLE_PLUGIN_ID } from '../example/example';
 
-export const DEPS_EXAMPLE_PLUGIN_ID = 'author-depsexample';
+export const DEPS_EXAMPLE_PLUGIN_ID = '@author/deps-example-plugin';
 
 export const depsExamplePlugin = createPlugin({
   id: DEPS_EXAMPLE_PLUGIN_ID,
@@ -306,7 +324,7 @@ import {
 } from '@pinosandro/react-plugin-system';
 import { EXAMPLE_PLUGIN_ID, type ExamplePluginApi } from '../example/example';
 
-export const DEPS_EXAMPLE_PLUGIN_ID = 'author-depsexample';
+export const DEPS_EXAMPLE_PLUGIN_ID = '@author/deps-example-plugin';
 
 interface DepsExamplePluginApi {
   anotherHelloMethod(): void;
@@ -332,27 +350,22 @@ export const depsExamplePlugin = createPlugin<
   DepsExamplePluginId,
   DepsExamplePluginDeps,
   DepsExampleOptions
->(
-  {
-    id: DEPS_EXAMPLE_PLUGIN_ID,
-    dependencies: {
-      exampleApi: EXAMPLE_PLUGIN_ID,
-    },
-    createApiClient({ exampleApi }, options) {
-      console.log(options.foo);
+>({
+  id: DEPS_EXAMPLE_PLUGIN_ID,
+  dependencies: {
+    exampleApi: EXAMPLE_PLUGIN_ID,
+  },
+  createApiClient({ exampleApi }, options) {
+    console.log(options.foo);
 
-      return {
-        anotherHelloMethod() {
-          console.log('Hello from depsExamplePlugin API Client!');
-          exampleApi.printHello();
-        },
-      };
-    },
+    return {
+      anotherHelloMethod() {
+        console.log('Hello from depsExamplePlugin API Client!');
+        exampleApi.printHello();
+      },
+    };
   },
-  {
-    foo: 'bar',
-  },
-);
+});
 ```
 
 ### End Notes
