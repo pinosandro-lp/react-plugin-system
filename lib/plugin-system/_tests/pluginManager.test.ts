@@ -1,5 +1,6 @@
 import { describe, expect, it, afterEach } from 'vitest';
 import { PluginManager } from '../pluginManager';
+import { configurePlugin } from '../configurePlugin';
 import {
   DEPENDENCY_TEST_PLUGIN_ID,
   dependencyTestPlugin,
@@ -125,12 +126,7 @@ describe('PluginManager class', () => {
       option2: 42,
     };
 
-    pluginManager.load([
-      {
-        plugin: withOptionsPlugin,
-        options,
-      },
-    ]);
+    pluginManager.load([configurePlugin(withOptionsPlugin, options)]);
 
     const loadedPlugin = pluginManager.getById(WITH_OPTIONS_PLUGIN_ID);
 
