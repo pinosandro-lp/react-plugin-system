@@ -21,7 +21,6 @@ export function extractPluginProviders<const P extends readonly unknown[]>(
           lp as { plugin: { provider: React.FC<React.PropsWithChildren> } }
         ).plugin?.provider;
       }
-      return undefined;
     })
     .filter(isDefined);
 }
