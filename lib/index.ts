@@ -7,4 +7,8 @@ export type {
 } from './plugin-system';
 
 export { usePluginApi } from './hooks';
-export { createPlugin, createPluginApp } from './plugin-system';
+export {
+  createPlugin,
+  createPluginApp,
+  configurePlugin,
+} from './plugin-system';
